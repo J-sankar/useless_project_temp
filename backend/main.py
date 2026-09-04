@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from sqlalchemy import event
 from database import engine, Base, SessionLocal
 from models import PersonalityPreset  # Adjust import paths as needed
+from api.pets import router as petRouter 
 from seed import seed_default_presets
 # Force SQLite to enforce Foreign Key constraints
 
@@ -40,3 +41,5 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/")
 def read_root(count:int):
     return {"status": "PawPost backend running"}
+
+app.include_router(petRouter)

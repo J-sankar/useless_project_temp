@@ -7,7 +7,8 @@ class PersonalityPreset(Base):
     __tablename__ = "personality_presets"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    voice_id = Column(String, nullable=False)
+    tts_lang = Column(String, nullable=False, default="en")
+    tts_tld = Column(String, nullable=False, default="com")
     prompt_template = Column(Text, nullable=False)
     description = Column(String)
 
