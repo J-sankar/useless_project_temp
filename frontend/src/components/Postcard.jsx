@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Heart, MessageCircle, Mic, AlertTriangle, Send } from "lucide-react";
+import { useState } from "react";
+import { Dog, PawPrint } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/useAuth.js";
 
@@ -13,147 +13,78 @@ function timeAgo(iso) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function PostCard({ post, reason, index = 0, tilt = "tilt-l" }) {
+export default function PostCard({ post, index = 0, tilt = "tilt-l" }) {
   const { pet } = useAuth();
-  const [liked, setLiked] = useState(post.liked_by_me);
-  const [likeCount, setLikeCount] = useState(post.like_count);
-  const [video, setVideo] = useState(post.video);
-  const [comments, setComments] = useState(null);
+  const [liked, setLiked] = useState(Boolean(post.liked_by_me));
+  const [likeCount, setLikeCount] = useState(post.like_count || 0);
   const [showComments, setShowComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
-
-  // useEffect runs side effects — things that happen "outside" rendering,
-  // like timers, subscriptions, or fetching data.
-  // This one polls the backend every 3s while the video is still being dubbed.
-  useEffect(() => {
-    if (!video || video.status !== "processing") return;
-    const interval = setInterval(async () => {
-      try {
-        const updated = await api.videoStatus(video.id);
-        setVideo(updated);
-        if (updated.status !== "processing") clearInterval(interval);
-      } catch {
-        clearInterval(interval);
-      }
-    }, 3000);
-    // the function returned here is "cleanup" — React calls it if the
-    // component unmounts or `video` changes again, so we don't leak timers.
-    return () => clearInterval(interval);
-  }, [video]); // re-run this effect whenever `video` changes
+  const [comment, setComment] = useState("");
+  const [localComments, setLocalComments] = useState([]);
+  const [savedComments, setSavedComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState("");
 
   const toggleLike = async () => {
     if (!pet) return;
-    if (liked) {
-      setLiked(false);
-      setLikeCount((c) => c - 1);
-      await api.unlike(post.id).catch(() => {});
-    } else {
-      setLiked(true);
-      setLikeCount((c) => c + 1);
-      await api.like(post.id).catch(() => {});
+    const result = await api.like(post.id, pet.id).catch(() => null);
+    if (result) {
+      setLiked(result.liked);
+      setLikeCount(result.like_count);
     }
   };
 
-  const loadComments = async () => {
-    setShowComments((s) => !s);
-    if (!comments) {
+  const toggleComments = async () => {
+    const opening = !showComments;
+    setShowComments(opening);
+    if (!opening || savedComments.length > 0) return;
+
+    setCommentsLoading(true);
+    setCommentsError("");
+    try {
       const data = await api.comments(post.id);
-      setComments(data);
+      const comments = Array.isArray(data) ? data : data.comments || [];
+      setSavedComments(comments);
+    } catch (error) {
+      setCommentsError(error.message);
+    } finally {
+      setCommentsLoading(false);
     }
   };
 
-  const submitComment = async (e) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    const created = await api.addComment(post.id, commentText.trim());
-    setComments((prev) => [...(prev || []), created]);
-    setCommentText("");
+  const submitComment = (event) => {
+    event.preventDefault();
+    if (!comment.trim()) return;
+    setLocalComments((current) => [...current, { id: `${Date.now()}-${current.length}`, text: comment.trim() }]);
+    setComment("");
   };
 
   return (
     <article className={`card post-card ${tilt}`} style={{ "--post-delay": `${Math.min(index, 6) * 90}ms` }}>
       <div className="post-head">
-        <div className="avatar">
-          {post.pet_avatar ? (
-            <img
-              src={post.pet_avatar}
-              alt=""
-              style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" }}
-            />
-          ) : (
-            post.pet_name?.[0]?.toUpperCase()
-          )}
-        </div>
-        <div>
-          <div className="post-pet-name">{post.pet_name}</div>
-          <div className="post-reason">
-            {timeAgo(post.created_at)}
-            {reason === "following" ? " · from a pet you follow" : reason === "trending" ? " · trending" : ""}
-          </div>
-        </div>
+        <div className="avatar">{post.pet_avatar_url ? <img src={post.pet_avatar_url} alt={`${post.pet_name} avatar`} /> : post.pet_name?.[0]?.toUpperCase()}</div>
+        <div><div className="post-pet-name">{post.pet_name}</div><div className="post-reason">{timeAgo(post.created_at)}</div></div>
       </div>
-
       {post.caption && <p className="post-caption">{post.caption}</p>}
+      {post.media_url && (post.media_type === "image" || post.media_type === "picture") && <div className="post-media"><img src={post.media_url} alt="" /></div>}
+      {post.media_url && (post.media_type === "video" || post.media_type === "animalvlog") && <div className="post-media"><video src={post.media_url} controls preload="metadata" /></div>}
 
-      {post.image_url && (
-        <div className="post-media">
-          <img src={post.image_url} alt="" />
-        </div>
-      )}
-
-      {video && video.status === "ready" && video.dubbed_url && (
-        <div className="post-media">
-          <video src={video.dubbed_url} controls preload="metadata" />
-        </div>
-      )}
-
-      {video && video.status === "processing" && (
-        <div className="dub-status">
-          <Mic size={16} style={{ verticalAlign: "middle", marginRight: 6 }} />
-          Auto-dubbing this clip... check back in a moment.
-        </div>
-      )}
-
-      {video && video.status === "failed" && (
-        <div className="dub-status">
-          <AlertTriangle size={16} style={{ verticalAlign: "middle", marginRight: 6 }} />
-          Dubbing didn't work out this time{video.error ? `: ${video.error}` : "."}
-        </div>
-      )}
-
-      {video && video.script && <div className="dub-script">"{video.script}"</div>}
-
-      <div className="post-actions">
-        <button className={`action-btn${liked ? " liked" : ""}`} onClick={toggleLike} disabled={!pet}>
-          <Heart size={16} fill={liked ? "currentColor" : "none"} /> {likeCount}
+      <div className="post-actions animal-actions">
+        <button className={`action-btn animal-action${liked ? " liked" : ""}`} onClick={toggleLike} disabled={!pet} title="Give a paw">
+          <PawPrint size={19} fill={liked ? "currentColor" : "none"} /><span>{likeCount}</span><small>Paw</small>
         </button>
-        <button className="action-btn" onClick={loadComments}>
-          <MessageCircle size={16} /> {post.comment_count}
+        <button className="action-btn animal-action" onClick={toggleComments} title="Leave a bark">
+          <Dog size={20} /><span>{(post.comment_count || 0) + localComments.length}</span><small>Bark</small>
         </button>
       </div>
 
-      {showComments && (
-        <div className="comments-block">
-          {(comments || []).map((c) => (
-            <div className="comment-row" key={c.id}>
-              <b>{c.pet_name}</b> {c.text}
-            </div>
-          ))}
-          {(comments || []).length === 0 && <div className="comment-row">No comments yet.</div>}
-          {pet && (
-            <form className="comment-form" onSubmit={submitComment}>
-              <input
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder={`Comment as ${pet.name}...`}
-              />
-              <button className="btn btn-primary" type="submit">
-                <Send size={14} />
-              </button>
-            </form>
-          )}
-        </div>
-      )}
+      {showComments && <div className="comments-block">
+        <div className="comment-heading"><Dog size={17} /> Bark section</div>
+        {commentsLoading && <div className="comment-row">Listening for barks...</div>}
+        {commentsError && <div className="comment-row error-text">{commentsError}</div>}
+        {savedComments.map((item) => <div className="comment-row" key={item.id}><b>Pet #{item.pet_id}</b> {item.text}</div>)}
+        {localComments.map((item) => <div className="comment-row" key={item.id}><b>{pet?.name || "You"}</b> {item.text}</div>)}
+        <form className="comment-form" onSubmit={submitComment}><input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Leave a little bark..." /><button className="btn btn-primary" type="submit" aria-label="Post bark"><Dog size={15} /></button></form>
+      </div>}
     </article>
   );
 }

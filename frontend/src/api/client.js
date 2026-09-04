@@ -2,14 +2,16 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 async function request(path, options = {}) {
-  const token = localStorage.getItem("pet-social-token");
-  const response = await fetch(`${API_URL}${path}`, {
+  const headers = {
+    ...options.headers,
+  };
+  if (!options.formData) headers["Content-Type"] = "application/json";
+
+  const url = `${API_URL}${path}`;
+  console.log(`[api] ${options.method || "GET"} ${url}`);
+  const response = await fetch(url, {
     ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -23,26 +25,44 @@ async function request(path, options = {}) {
     throw new Error(message);
   }
 
-  return response.status === 204 ? null : response.json();
+  if (response.status === 204) return null;
+  const data = await response.json();
+  console.log(`[api] response ${response.status} ${path}:`, data);
+  return data;
 }
 
 export const api = {
-  login: (email, password) => request("/auth/login", {
+  pets: () => request("/pets"),
+  createPet: (pet) => request("/pets", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(pet),
   }),
-  signup: (name, email, password) => request("/auth/signup", {
+  feed: () => request("/posts"),
+  createPost: (post) => request("/posts", {
     method: "POST",
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify(post),
   }),
-  feed: () => request("/feed"),
-  suggestions: () => request("/pets/suggestions"),
-  like: (postId) => request(`/posts/${postId}/like`, { method: "POST" }),
-  unlike: (postId) => request(`/posts/${postId}/like`, { method: "DELETE" }),
+  like: (postId, petId) => request(`/posts/${postId}/like`, {
+    method: "POST",
+    body: JSON.stringify({ pet_id: petId }),
+  }),
   comments: (postId) => request(`/posts/${postId}/comments`),
-  addComment: (postId, text) => request(`/posts/${postId}/comments`, {
-    method: "POST",
-    body: JSON.stringify({ text }),
-  }),
-  videoStatus: (videoId) => request(`/videos/${videoId}`),
+  presets: async () => {
+    const data = await request("/personality-presets");
+    const presets = Array.isArray(data) ? data : data?.presets;
+    console.log("[api] normalized personality presets:", presets);
+    return { presets: Array.isArray(presets) ? presets : [] };
+  },
+  uploadAnimalVlog: (file, petId, presetId) => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("pet_id", String(petId));
+    form.append("personality_preset_id", String(presetId));
+    return request("/animalvlog/upload", {
+      method: "POST",
+      body: form,
+      formData: true,
+    });
+  },
+  animalVlogStatus: (jobId) => request(`/animalvlog/status/${jobId}`),
 };
