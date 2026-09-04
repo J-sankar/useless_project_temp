@@ -37,6 +37,7 @@ class Comment(Base):
     id = Column(Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
     pet_id = Column(Integer, ForeignKey("pets.id"), nullable=False)
+    pet_name = Column(String)
     text = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 

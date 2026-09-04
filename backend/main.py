@@ -1,9 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import event
 from database import engine, Base, SessionLocal
 from models import PersonalityPreset  # Adjust import paths as needed
 from api.pets import router as petRouter 
+from api.personality import router 
+from api.posts import router as postsRouter
 from seed import seed_default_presets
 # Force SQLite to enforce Foreign Key constraints
 
@@ -38,8 +41,19 @@ async def lifespan(app: FastAPI):
 
 # Pass the lifespan function directly to your FastAPI app instance:
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],             # Allows requests from Vite, Next.js, or local HTML
+    allow_credentials=True,
+    allow_methods=["*"],             # Allows GET, POST, PUT, DELETE, OPTIONS
+    allow_headers=["*"],             # Allows headers like Content-Type and Authorization
+)
 @app.get("/")
 def read_root(count:int):
     return {"status": "PawPost backend running"}
 
 app.include_router(petRouter)
+app.include_router(router)
+app.include_router(postsRouter)

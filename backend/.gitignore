@@ -1,31 +1,4 @@
-
+.env 
 __pycache__
-.env
 .venv
-output
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> fd4b2c3 (remove assets from gitignore)
+pawpost.db
