@@ -14,7 +14,7 @@ export default function Signup() {
     event.preventDefault();
     setBusy(true);
     setError("");
-    try { await signup(form.name, form.email, form.password); navigate("/"); }
+    try { await signup(form.name, form.email, form.password); navigate("/feed"); }
     catch (err) { setError(err.message); }
     finally { setBusy(false); }
   };

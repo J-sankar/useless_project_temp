@@ -20,7 +20,7 @@ export default function Login() {
     setBusy(true);
     try {
       await login(email, password); // defined in AuthContext, calls the backend
-      navigate("/", { state: { justLoggedIn: true } });
+      navigate("/feed", { state: { justLoggedIn: true } });
     } catch (err) {
       setError(err.message);
     } finally {
