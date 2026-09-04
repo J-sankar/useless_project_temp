@@ -13,8 +13,8 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={pet ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/signup" element={pet ? <Navigate to="/" replace /> : <Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/" element={<Landing />} />
       <Route path="/feed" element={pet ? <FeedPage /> : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

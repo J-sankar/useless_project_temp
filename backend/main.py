@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import event
 from database import engine, Base, SessionLocal
 from models import PersonalityPreset  # Adjust import paths as needed
@@ -49,6 +51,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],             # Allows GET, POST, PUT, DELETE, OPTIONS
     allow_headers=["*"],             # Allows headers like Content-Type and Authorization
+)
+app.mount(
+    "/assets",
+    StaticFiles(directory=Path(__file__).resolve().parents[1] / "frontend" / "assets"),
+    name="frontend-assets",
 )
 @app.get("/")
 def read_root(count:int):

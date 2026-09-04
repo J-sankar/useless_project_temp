@@ -13,6 +13,9 @@ class PostCreate(BaseModel):
 class PostResponse(BaseModel):
     id: int
     pet_id: int
+    pet_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    pet_avatar_url: Optional[str] = None
     caption: Optional[str] = None
     media_url: Optional[str] = None
     media_type: Optional[str] = None

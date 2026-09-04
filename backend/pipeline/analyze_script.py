@@ -30,4 +30,4 @@ def analyze_and_script(frame_paths, personality_prompt, pet_name):
         )
         return response.text.strip()
     except Exception as e:
-        print(f"ERROR: {str(e).lower()}")
+        raise RuntimeError(f"Gemini script analysis failed: {e}") from e

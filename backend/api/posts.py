@@ -20,19 +20,23 @@ from pipeline.generate_audio import generate_malayalam_audio
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 MEDIA_DIR = Path(__file__).resolve().parents[1] / "media" / "animal_vlogs"
+POST_MEDIA_DIR = Path(__file__).resolve().parents[1] / "media" / "posts"
 
 
 @router.get("", response_model=List[PostResponse])
 def get_feed(db: Session = Depends(get_db)):
-    posts = db.query(Post).order_by(Post.created_at.desc()).all()
+    posts = db.query(Post, Pet).join(Pet, Pet.id == Post.pet_id).order_by(Post.created_at.desc()).all()
     feed = []
-    for post in posts:
+    for post, pet in posts:
         like_cnt = db.query(func.count(Like.id)).filter(Like.post_id == post.id).scalar()
         comment_cnt = db.query(func.count(Comment.id)).filter(Comment.post_id == post.id).scalar()
         
         feed.append(PostResponse(
             id=post.id,
             pet_id=post.pet_id,
+            pet_name=pet.name,
+            avatar_url=pet.avatar_url,
+            pet_avatar_url=pet.avatar_url,
             caption=post.caption,
             media_url=post.media_url,
             media_type=post.media_type,
@@ -58,17 +62,79 @@ def create_post(payload: PostCreate, db: Session = Depends(get_db)):
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
-    
+
     return PostResponse(
         id=new_post.id,
         pet_id=new_post.pet_id,
+        pet_name=pet.name,
+        avatar_url=pet.avatar_url,
+        pet_avatar_url=pet.avatar_url,
         caption=new_post.caption,
         media_url=new_post.media_url,
         media_type=new_post.media_type,
         created_at=new_post.created_at,
         like_count=0,
-        comment_count=0
+        comment_count=0,
     )
+
+
+@router.post("/upload", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
+def create_file_post(
+    media: UploadFile = File(...),
+    pet_id: int = Form(...),
+    caption: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    pet = db.query(Pet).filter(Pet.id == pet_id).first()
+    if not pet:
+        raise HTTPException(status_code=404, detail="Pet not found")
+    if not media.filename or media.content_type not in {"image/jpeg", "image/png", "image/gif", "image/webp", "video/mp4", "video/webm", "video/quicktime"}:
+        raise HTTPException(status_code=400, detail="Upload a JPEG, PNG, GIF, WEBP, MP4, WEBM, or MOV file.")
+
+    POST_MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+    suffix = Path(media.filename).suffix.lower()
+    stored_name = f"{uuid4().hex}{suffix}"
+    stored_path = POST_MEDIA_DIR / stored_name
+    with stored_path.open("wb") as destination:
+        shutil.copyfileobj(media.file, destination)
+
+    media_type = "image" if media.content_type.startswith("image/") else "video"
+    post = Post(
+        pet_id=pet_id,
+        caption=caption.strip() or None,
+        media_url=f"/posts/media/{stored_name}",
+        media_type=media_type,
+    )
+    try:
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+    except Exception:
+        db.rollback()
+        stored_path.unlink(missing_ok=True)
+        raise
+
+    return PostResponse(
+        id=post.id,
+        pet_id=post.pet_id,
+        pet_name=pet.name,
+        avatar_url=pet.avatar_url,
+        pet_avatar_url=pet.avatar_url,
+        caption=post.caption,
+        media_url=post.media_url,
+        media_type=post.media_type,
+        created_at=post.created_at,
+        like_count=0,
+        comment_count=0,
+    )
+
+
+@router.get("/media/{filename}")
+def get_post_media(filename: str):
+    media_path = POST_MEDIA_DIR / filename
+    if media_path.parent != POST_MEDIA_DIR or not media_path.is_file():
+        raise HTTPException(status_code=404, detail="Post media not found")
+    return FileResponse(media_path)
 
 
 @router.post("/animal-vlog", status_code=status.HTTP_201_CREATED)
@@ -114,8 +180,12 @@ def create_animal_vlog(
         db.commit()
         db.refresh(post)
         return {
+            "id": post.id,
             "post_id": post.id,
             "pet_id": post.pet_id,
+            "pet_name": pet.name,
+            "avatar_url": pet.avatar_url,
+            "pet_avatar_url": pet.avatar_url,
             "caption": post.caption,
             "media_type": post.media_type,
             "media_url": post.media_url,
@@ -189,10 +259,20 @@ def get_post_comments(post_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Post not found")
 
     comments = (
-        db.query(Comment, Pet.name.label("current_pet_name"))
+        db.query(Comment, Pet.name)
         .join(Pet, Pet.id == Comment.pet_id)
         .filter(Comment.post_id == post_id)
         .order_by(Comment.created_at.asc())
         .all()
     )
-    return comments
+    return [
+        CommentResponse(
+            id=comment.id,
+            post_id=comment.post_id,
+            pet_id=comment.pet_id,
+            pet_name=comment.pet_name or pet_name,
+            text=comment.text,
+            created_at=comment.created_at,
+        )
+        for comment, pet_name in comments
+    ]
