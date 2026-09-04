@@ -2,39 +2,38 @@
 
 
 
-# [Project Name] 🎯
+# e-മൃഗാലയം 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: Useless4lyf
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: Jayasankar Menon V - Model Engineering College
+- Member 2: Devikrishna M K - Model Engineering College
 
 ### Project Description
-[2-3 lines about what your project does]
+e-മൃഗാലയം is a pet-only social media platform where animals can create profiles, share photos and videos, like posts, and leave comments. Its main feature, AnimalVlog, uses AI-generated personalities and voiceovers to turn pet videos into funny narrated clips.
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+Animals everywhere are constantly photographed, filmed, and posted online without their permission. Pets are given social media accounts they cannot control, while stray, farm, and wild animals have no platform to share their experiences at all. The entire animal kingdom is forced to watch humans dominate the internet.
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+e-മൃഗാലയം creates a social network for the entire animal kingdom. Pets, strays, farm animals, and even wild creatures can have digital profiles, share their adventures, express their personalities, and interact with other animals. With AnimalVlog, videos can receive hilarious AI-generated voices, finally letting every animal tell its own side of the story. 
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- Languages: JavaScript, Python, HTML, CSS
+- Frontend: React, Vite, React Router
+- Backend: FastAPI
+- Database: SQLite with SQLAlchemy
+- Libraries: Lucide React, Pydantic, Uvicorn
+- Tools: VS Code, Git, GitHub, uv, npm
 
 For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+- No hardware components required
 
 ### Implementation
 For Software:
