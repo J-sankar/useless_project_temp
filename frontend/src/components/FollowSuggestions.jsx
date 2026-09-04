@@ -6,7 +6,7 @@ export default function FollowSuggestions() {
   const [pets, setPets] = useState([]);
 
   useEffect(() => {
-    api.suggestions().then(setPets).catch(() => setPets([]));
+    api.pets().then((data) => setPets(data.pets || [])).catch(() => setPets([]));
   }, []);
 
   return (
@@ -22,7 +22,9 @@ export default function FollowSuggestions() {
         <p className="page-sub">No suggestions yet.</p>
       ) : pets.map((suggestion) => (
         <div className="suggestion-row" key={suggestion.id}>
-          <div className="avatar small">{suggestion.name?.[0]?.toUpperCase()}</div>
+          <div className="avatar small">
+            {suggestion.avatar_url ? <img src={suggestion.avatar_url} alt={`${suggestion.name} avatar`} /> : suggestion.name?.[0]?.toUpperCase()}
+          </div>
           <div><strong>{suggestion.name}</strong><span>{suggestion.bio || "New around here"}</span></div>
           <button className="icon-btn" aria-label={`Follow ${suggestion.name}`} title={`Follow ${suggestion.name}`}><UserPlus size={15} /></button>
         </div>

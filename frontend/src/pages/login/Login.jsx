@@ -9,8 +9,7 @@ export default function Login() {
 
   // useState gives a component memory. Each call returns [currentValue, functionToChangeIt].
   // React re-renders the component automatically whenever you call the setter.
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -19,7 +18,7 @@ export default function Login() {
     setError("");
     setBusy(true);
     try {
-      await login(email, password); // defined in AuthContext, calls the backend
+      await login(name);
       navigate("/feed", { state: { justLoggedIn: true } });
     } catch (err) {
       setError(err.message);
@@ -45,21 +44,14 @@ export default function Login() {
 
         <form onSubmit={submit}>
           <div className="field">
-            <label>Email</label>
+            <label htmlFor="login-name">Pet name</label>
             <input
-              type="email"
+              id="login-name"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label>Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your pet's name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
           <button className="btn btn-primary" type="submit" disabled={busy} style={{ width: "100%" }}>

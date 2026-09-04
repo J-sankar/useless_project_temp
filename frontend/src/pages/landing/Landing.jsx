@@ -10,6 +10,16 @@ export default function Landing() {
   const [musicOn, setMusicOn] = useState(false);
   const audioRef = useRef(null);
 
+  const startMusic = async () => {
+    if (!audioRef.current || musicOn) return;
+    try {
+      await audioRef.current.play();
+      setMusicOn(true);
+    } catch {
+      // Browsers may require the first user gesture before allowing sound.
+    }
+  };
+
   useEffect(() => {
     const currentLine = lines[lineIndex];
     if (letterIndex < currentLine.length) {
@@ -30,20 +40,15 @@ export default function Landing() {
       setMusicOn(false);
       return;
     }
-    try {
-      await audioRef.current.play();
-      setMusicOn(true);
-    } catch {
-      setMusicOn(false);
-    }
+    await startMusic();
   };
 
   return (
-    <main className="landing-page">
+    <main className="landing-page" onPointerDown={startMusic}>
       <div className="landing-paw paw-one"><PawPrint size={38} /></div>
       <div className="landing-paw paw-two"><PawPrint size={25} /></div>
       <div className="landing-paw paw-three"><PawPrint size={31} /></div>
-      <audio ref={audioRef} src="/bgm.mp3" loop preload="none" />
+      <audio ref={audioRef} src="/bgm.mpeg" loop autoPlay preload="auto" />
       <button className="music-toggle" type="button" onClick={toggleMusic} aria-pressed={musicOn}>
         {musicOn ? <Volume2 size={17} /> : <VolumeX size={17} />}
         <span>{musicOn ? "BGM on" : "Play BGM"}</span>
