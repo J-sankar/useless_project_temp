@@ -57,9 +57,11 @@ app.mount(
     StaticFiles(directory=Path(__file__).resolve().parents[1] / "frontend" / "assets"),
     name="frontend-assets",
 )
-@app.get("/")
-def read_root(count:int):
-    return {"status": "PawPost backend running"}
+
+
+@app.api_route("/", methods=["GET", "HEAD"])
+def read_root():
+    return {"status": "ok"}
 
 app.include_router(petRouter)
 app.include_router(router)
