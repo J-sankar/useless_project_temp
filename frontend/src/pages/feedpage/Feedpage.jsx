@@ -3,6 +3,7 @@ import { PawPrint, UserRound } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { api } from "../../api/client.js";
 import PostCard from "../../components/Postcard.jsx";
+import PostComposer from "../../components/PostComposer.jsx";
 import { useAuth } from "../../context/useAuth.js";
 
 export default function FeedPage() {
@@ -13,13 +14,18 @@ export default function FeedPage() {
   const [error, setError] = useState("");
   const [showProfile, setShowProfile] = useState(false);
 
+  const addCreatedPost = (created) => {
+    const post = created?.post || created;
+    if (post?.id) setPosts((current) => [post, ...current]);
+  };
+
   useEffect(() => {
     let cancelled = false;
     async function loadFeed() {
       try {
         const data = await api.feed();
         const feedPosts = Array.isArray(data) ? data : data.posts || [];
-        if (!cancelled) setPosts(feedPosts.filter((post) => post.pet_id !== pet?.id));
+        if (!cancelled) setPosts(feedPosts);
       } catch (err) {
         if (!cancelled) setError(err.message);
       } finally {
@@ -48,6 +54,7 @@ export default function FeedPage() {
           <div className="mascot" aria-hidden="true"><PawPrint size={38} /></div>
         </header>
         {location.state?.justLoggedIn && <div className="welcome-banner"><strong>Welcome to e-മൃഗാലയം</strong><span>First online  മൃഗശാല</span></div>}
+        {pet && <PostComposer pet={pet} onCreated={addCreatedPost} />}
         {posts.length === 0 && <p className="page-sub empty-feed">No other animal posts yet. The zoo is waiting for some mischief!</p>}
         {posts.map((post, index) => <PostCard key={post.id} post={post} index={index} tilt={index % 2 === 0 ? "tilt-l" : "tilt-r"} />)}
       </main>

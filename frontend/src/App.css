@@ -69,6 +69,14 @@
 .mascot { width: 78px; height: 78px; display: grid; place-items: center; border-radius: 42% 58% 55% 45%; color: #fff; background: #e68152; box-shadow: 5px 6px 0 #c9613e; animation: mascot-bounce 2.8s ease-in-out infinite; transform: rotate(8deg); }
 @keyframes mascot-bounce { 0%, 100% { transform: translateY(0) rotate(8deg); } 50% { transform: translateY(-8px) rotate(-7deg); } }
 .post-card { padding: 22px; overflow: hidden; animation: card-pop .6s cubic-bezier(.2,.8,.2,1) var(--post-delay) both; }
+.composer { padding: 20px; }
+.composer-tabs { display: flex; gap: 8px; border-bottom: 1px solid #e6ddd2; margin: -20px -20px 8px; padding: 0 20px; }
+.composer-tab { display: inline-flex; align-items: center; gap: 7px; border: 0; border-bottom: 3px solid transparent; padding: 14px 4px 11px; color: #718087; background: transparent; font-weight: 700; }
+.composer-tab.active { color: #d95d39; border-bottom-color: #d95d39; }
+.composer .field { margin: 14px 0; }
+.composer select { width: 100%; padding: 11px 12px; border: 1px solid #d4cbc0; border-radius: 4px; background: #fff; color: #263238; }
+.composer-submit { display: inline-flex; align-items: center; gap: 7px; }
+.composer-message { margin: 12px 0; color: #28705c; font-size: 14px; }
 @keyframes card-pop { from { opacity: 0; transform: translateY(18px) rotate(-1.5deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
 .post-card.tilt-l, .post-card.tilt-r { animation-name: card-pop; }
 .post-card:hover { box-shadow: 11px 13px 0 #d7cabc; transform: translateY(-3px) rotate(0); transition: transform .2s ease, box-shadow .2s ease; }

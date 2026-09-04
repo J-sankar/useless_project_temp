@@ -7,7 +7,8 @@ class PersonalityPreset(Base):
     __tablename__ = "personality_presets"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    voice_id = Column(String, nullable=False)
+    tts_lang = Column(String, nullable=False, default="en")
+    tts_tld = Column(String, nullable=False, default="com")
     prompt_template = Column(Text, nullable=False)
     description = Column(String)
 
@@ -36,6 +37,7 @@ class Comment(Base):
     id = Column(Integer, primary_key=True)
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
     pet_id = Column(Integer, ForeignKey("pets.id"), nullable=False)
+    pet_name = Column(String)
     text = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 

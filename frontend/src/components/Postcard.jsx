@@ -23,6 +23,9 @@ export default function PostCard({ post, index = 0, tilt = "tilt-l" }) {
   const [savedComments, setSavedComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const displayName = post.pet_name || `Pet #${post.pet_id}`;
+  const avatarUrl = post.avatar_url || post.pet_avatar_url;
 
   const toggleLike = async () => {
     if (!pet) return;
@@ -51,18 +54,28 @@ export default function PostCard({ post, index = 0, tilt = "tilt-l" }) {
     }
   };
 
-  const submitComment = (event) => {
+  const submitComment = async (event) => {
     event.preventDefault();
-    if (!comment.trim()) return;
-    setLocalComments((current) => [...current, { id: `${Date.now()}-${current.length}`, text: comment.trim() }]);
-    setComment("");
+    if (!comment.trim() || !pet || commentSubmitting) return;
+    setCommentSubmitting(true);
+    setCommentsError("");
+    try {
+      const saved = await api.addComment(post.id, pet.id, comment.trim());
+      setSavedComments((current) => [...current, saved]);
+      setLocalComments((current) => [...current, saved]);
+      setComment("");
+    } catch (error) {
+      setCommentsError(error.message);
+    } finally {
+      setCommentSubmitting(false);
+    }
   };
 
   return (
     <article className={`card post-card ${tilt}`} style={{ "--post-delay": `${Math.min(index, 6) * 90}ms` }}>
       <div className="post-head">
-        <div className="avatar">{post.pet_avatar_url ? <img src={post.pet_avatar_url} alt={`${post.pet_name} avatar`} /> : post.pet_name?.[0]?.toUpperCase()}</div>
-        <div><div className="post-pet-name">{post.pet_name}</div><div className="post-reason">{timeAgo(post.created_at)}</div></div>
+        <div className="avatar">{avatarUrl ? <img src={avatarUrl} alt={`${displayName} avatar`} /> : displayName[0]?.toUpperCase()}</div>
+        <div><div className="post-pet-name">{displayName}</div><div className="post-reason">{timeAgo(post.created_at)}</div></div>
       </div>
       {post.caption && <p className="post-caption">{post.caption}</p>}
       {post.media_url && (post.media_type === "image" || post.media_type === "picture") && <div className="post-media"><img src={post.media_url} alt="" /></div>}
@@ -81,9 +94,8 @@ export default function PostCard({ post, index = 0, tilt = "tilt-l" }) {
         <div className="comment-heading"><Dog size={17} /> Bark section</div>
         {commentsLoading && <div className="comment-row">Listening for barks...</div>}
         {commentsError && <div className="comment-row error-text">{commentsError}</div>}
-        {savedComments.map((item) => <div className="comment-row" key={item.id}><b>Pet #{item.pet_id}</b> {item.text}</div>)}
-        {localComments.map((item) => <div className="comment-row" key={item.id}><b>{pet?.name || "You"}</b> {item.text}</div>)}
-        <form className="comment-form" onSubmit={submitComment}><input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Leave a little bark..." /><button className="btn btn-primary" type="submit" aria-label="Post bark"><Dog size={15} /></button></form>
+        {savedComments.map((item) => <div className="comment-row" key={item.id}><b>{item.pet_name || `Pet #${item.pet_id}`}</b> {item.text}</div>)}
+        <form className="comment-form" onSubmit={submitComment}><input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Leave a little bark..." disabled={!pet || commentSubmitting} /><button className="btn btn-primary" type="submit" aria-label="Post bark" disabled={!pet || commentSubmitting}><Dog size={15} /></button></form>
       </div>}
     </article>
   );
