@@ -10,8 +10,10 @@ from api.pets import router as petRouter
 from api.personality import router 
 from api.posts import router as postsRouter
 from seed import seed_default_presets
+from dotenv import load_dotenv
+import os
 # Force SQLite to enforce Foreign Key constraints
-
+load_dotenv()
 app = FastAPI(title="Unplanned")
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -47,6 +49,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        os.getenv("FRONTEND_URL")
     ],             # Allows requests from Vite, Next.js, or local HTML
     allow_credentials=True,
     allow_methods=["*"],             # Allows GET, POST, PUT, DELETE, OPTIONS
