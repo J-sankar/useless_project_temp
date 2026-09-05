@@ -5,6 +5,7 @@ import { useAuth } from "../../context/useAuth.js";
 import { DEFAULT_AVATAR } from "../../data/avatars.js";
 import AvatarPicker from "../../components/AvatarPicker.jsx";
 import { api } from "../../api/client.js";
+import DisclaimerOverlay from "../../components/DisclaimerOverlay.jsx";
 
 export default function Signup() {
   const { signup } = useAuth();
@@ -13,6 +14,7 @@ export default function Signup() {
   const [presets, setPresets] = useState([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   useEffect(() => {
     api.presets().then((data) => {
@@ -38,7 +40,7 @@ export default function Signup() {
     finally { setBusy(false); }
   };
 
-  return <div className="auth-wrap"><div className="card tilt-r"><div className="tape" />
+  return <div className="auth-wrap">{showDisclaimer && <DisclaimerOverlay onClose={() => setShowDisclaimer(false)} />}<div className="card tilt-r"><div className="tape" />
     <div className="brand-lockup" aria-label="e-മൃഗാലയം, First online മൃഗശാല">
       <span className="brand-name">e-മൃഗാലയം</span>
       <span className="brand-tagline">First online  മൃഗശാല</span>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PawPrint, UserRound } from "lucide-react";
+import { CalendarDays, PawPrint, Sparkles, UserRound } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { api } from "../../api/client.js";
 import PostCard from "../../components/Postcard.jsx";
@@ -44,12 +44,25 @@ export default function FeedPage() {
 
   return (
     <div className="feed-layout feed-only">
+      <div className="paw-rain" aria-hidden="true">
+        <PawPrint className="rain-paw rain-paw-1" size={30} />
+        <PawPrint className="rain-paw rain-paw-2" size={38} />
+        <PawPrint className="rain-paw rain-paw-3" size={25} />
+        <PawPrint className="rain-paw rain-paw-4" size={34} />
+        <PawPrint className="rain-paw rain-paw-5" size={28} />
+        <PawPrint className="rain-paw rain-paw-6" size={42} />
+        <PawPrint className="rain-paw rain-paw-7" size={24} />
+        <PawPrint className="rain-paw rain-paw-8" size={32} />
+        <PawPrint className="rain-paw rain-paw-9" size={26} />
+        <PawPrint className="rain-paw rain-paw-10" size={37} />
+      </div>
       <main className="feed-main">
         <header className="feed-masthead">
           <div>
             <p className="eyebrow">The happy pet network</p>
             <h1>Today's tail-wagging moments</h1>
             <p className="page-sub">Posts from the other wonderful animals in e-മൃഗാലയം.</p>
+            <div className="feed-meta"><span><Sparkles size={14} /> Fresh from the zoo</span><span><CalendarDays size={14} /> {posts.length} moments</span></div>
           </div>
           <div className="mascot" aria-hidden="true"><PawPrint size={38} /></div>
         </header>
@@ -72,6 +85,8 @@ export default function FeedPage() {
             <h2>{pet?.name}</h2>
             <p className="profile-species">{pet?.species}{pet?.breed ? ` · ${pet.breed}` : ""}</p>
             <p className="page-sub">{pet?.bio || "A mysterious creature of the e-മൃഗാലയം."}</p>
+            <div className="profile-facts"><span><b>01</b><small>profile</small></span><span><b>{posts.filter((post) => post.pet_id === pet?.id).length}</b><small>moments</small></span><span><b>✦</b><small>favorite</small></span></div>
+            <div className="profile-note"><PawPrint size={18} /> Keep making the feed wonderfully yours.</div>
           </section>
         </div>
       )}

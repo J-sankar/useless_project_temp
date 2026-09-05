@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Film, ImagePlus, LoaderCircle, Send } from "lucide-react";
+import { Bird, Film, ImagePlus, LoaderCircle, Send } from "lucide-react";
 import { api } from "../api/client.js";
 
 export default function PostComposer({ pet, onCreated }) {
@@ -10,6 +10,7 @@ export default function PostComposer({ pet, onCreated }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [delivered, setDelivered] = useState(false);
 
   useEffect(() => {
     setMessage("");
@@ -33,7 +34,9 @@ export default function PostComposer({ pet, onCreated }) {
       setCaption("");
       setMedia(null);
       setVideo(null);
-      setMessage(mode === "post" ? "Post published." : "Animal vlog published.");
+      setMessage(mode === "post" ? "Post delivered." : "Animal vlog delivered.");
+      setDelivered(true);
+      window.setTimeout(() => setDelivered(false), 1800);
       onCreated(created);
     } catch (requestError) {
       setError(requestError.message);
@@ -43,6 +46,7 @@ export default function PostComposer({ pet, onCreated }) {
   };
 
   return <section className="card composer">
+    {delivered && <div className="delivery-animation" role="status" aria-live="polite"><div className="delivery-cloud delivery-cloud-one" /><div className="delivery-cloud delivery-cloud-two" /><Bird className="delivery-bird" size={62} /><strong>Delivered!</strong></div>}
     <div className="composer-tabs">
       <button type="button" className={mode === "post" ? "composer-tab active" : "composer-tab"} onClick={() => setMode("post")}><ImagePlus size={17} /> New post</button>
       <button type="button" className={mode === "vlog" ? "composer-tab active" : "composer-tab"} onClick={() => setMode("vlog")}><Film size={17} /> Animal vlog</button>
@@ -54,7 +58,7 @@ export default function PostComposer({ pet, onCreated }) {
       </> : <div className="field"><label htmlFor="animal-vlog-file">Video file</label><input id="animal-vlog-file" type="file" accept="video/*" required onChange={(event) => setVideo(event.target.files?.[0] || null)} /></div>}
       {error && <div className="error-box">{error}</div>}
       {message && <div className="composer-message">{message}</div>}
-      <button className="btn btn-primary composer-submit" type="submit" disabled={busy}>{busy ? <><LoaderCircle className="spin" size={17} /> Publishing...</> : <><Send size={17} /> Publish</>}</button>
+      <button className="btn btn-primary composer-submit" type="submit" disabled={busy}>{busy ? <><LoaderCircle className="spin" size={17} /> Delivering...</> : <><Send size={17} /> Deliver</>}</button>
     </form>
   </section>;
 }

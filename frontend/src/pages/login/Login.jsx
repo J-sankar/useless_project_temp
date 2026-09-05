@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import { useAuth } from "../../context/useAuth.js";
+import DisclaimerOverlay from "../../components/DisclaimerOverlay.jsx";
 
 export default function Login() {
   const { login } = useAuth();
@@ -12,6 +13,7 @@ export default function Login() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   const submit = async (e) => {
     e.preventDefault(); // stop the browser's default "reload the page" form behavior
@@ -29,6 +31,7 @@ export default function Login() {
 
   return (
     <div className="auth-wrap">
+      {showDisclaimer && <DisclaimerOverlay onClose={() => setShowDisclaimer(false)} />}
       <div className="card tilt-l">
         <div className="tape" />
         <div className="brand-lockup" aria-label="e-മൃഗാലയം, First online മൃഗശാല">
