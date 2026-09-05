@@ -1,5 +1,19 @@
 
+import { AVATARS } from "../data/avatars.js";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+function normalizeAvatarUrl(value) {
+  if (typeof value !== "string" || !value.startsWith("/assets/")) return value;
+
+  const match = value.match(/avatar(\d+)/i);
+  if (match) {
+    const bundledAvatar = AVATARS[Number(match[1]) - 1];
+    if (bundledAvatar) return bundledAvatar.src;
+  }
+
+  return `${window.location.origin}${value}`;
+}
 
 function normalizeUrl(value) {
   return typeof value === "string" && value.startsWith("/") ? `${API_URL}${value}` : value;
@@ -10,8 +24,8 @@ function normalizePost(post) {
   return {
     ...post,
     media_url: normalizeUrl(post.media_url),
-    avatar_url: normalizeUrl(post.avatar_url),
-    pet_avatar_url: normalizeUrl(post.pet_avatar_url),
+    avatar_url: normalizeAvatarUrl(post.avatar_url) || normalizeUrl(post.avatar_url),
+    pet_avatar_url: normalizeAvatarUrl(post.pet_avatar_url) || normalizeUrl(post.pet_avatar_url),
   };
 }
 

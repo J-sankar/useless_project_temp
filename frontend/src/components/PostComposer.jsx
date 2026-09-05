@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bird, Film, ImagePlus, LoaderCircle, Send } from "lucide-react";
 import { api } from "../api/client.js";
 
@@ -11,11 +11,27 @@ export default function PostComposer({ pet, onCreated }) {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [delivered, setDelivered] = useState(false);
+  const birdAudioRef = useRef(null);
 
   useEffect(() => {
     setMessage("");
     setError("");
   }, [mode]);
+
+  useEffect(() => {
+    const audio = birdAudioRef.current;
+    if (!delivered || !audio) return undefined;
+
+    audio.currentTime = 0;
+    audio.play().catch(() => {
+      // The successful submit gesture normally permits playback; ignore browser autoplay blocks.
+    });
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [delivered]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -46,7 +62,7 @@ export default function PostComposer({ pet, onCreated }) {
   };
 
   return <section className="card composer">
-    {delivered && <div className="delivery-animation" role="status" aria-live="polite"><div className="delivery-cloud delivery-cloud-one" /><div className="delivery-cloud delivery-cloud-two" /><Bird className="delivery-bird" size={62} /><strong>Delivered!</strong></div>}
+    {delivered && <div className="delivery-animation" role="status" aria-live="polite"><audio ref={birdAudioRef} autoPlay preload="auto"><source src="/bird.mp3" type="audio/mpeg" /><source src="/bird.aac" type="audio/aac" /></audio><div className="delivery-cloud delivery-cloud-one" /><div className="delivery-cloud delivery-cloud-two" /><Bird className="delivery-bird" size={62} /><strong>Delivered!</strong></div>}
     <div className="composer-tabs">
       <button type="button" className={mode === "post" ? "composer-tab active" : "composer-tab"} onClick={() => setMode("post")}><ImagePlus size={17} /> New post</button>
       <button type="button" className={mode === "vlog" ? "composer-tab active" : "composer-tab"} onClick={() => setMode("vlog")}><Film size={17} /> Animal vlog</button>
