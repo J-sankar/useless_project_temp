@@ -114,15 +114,19 @@ npm run preview
 ### Project Documentation
 For Software:
 
-# Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+# Screenshots
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+![Landing page](docs/Landing.jpeg)
+*The animated landing page introducing e-മൃഗാലയം and its pet-friendly experience.*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+![Profile creation](docs/Creation.jpeg)
+*The profile creation screen where users choose an animal name, avatar, species, and personality.*
+
+![Feed page](docs/Feed.jpeg)
+*The social feed showing animal posts, media, likes, comments, and the post composer.*
+
+![Animal profile](docs/Profile.jpeg)
+*The profile panel displaying an animal’s avatar, details, and activity summary.*
 
 # Diagrams
 
@@ -183,37 +187,21 @@ sequenceDiagram
     Frontend->>User: Display dubbed video in feed
 ```
 *Step-by-step flow of the AnimalVlog feature: the upload kicks off a background pipeline that moves through keyframe extraction, vision analysis, script generation, TTS, and compositing, with the frontend polling job status until the final dubbed video is ready.*
-For Hardware:
 
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
 
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
+![Final build](docs/Feed.jpeg)
+The final build is a full-stack pet social media platform. The React frontend provides profile creation, login, media posting, likes, comments, animated interactions, and a pet-friendly interface. The FastAPI backend manages profiles, posts, media uploads, comments, likes, and database operations using SQLite and SQLAlchemy. The AnimalVlog pipeline processes uploaded pet videos, generates AI narration, converts it to audio, and produces a completed narrated vlog.
 
 ### Project Demo
 # Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
+https://drive.google.com/file/d/19OvnttMqVGN3AM-0a28D2Dv0M-U6Vpia/view?usp=drivesdk
+This 
 
-# Additional Demos
-[Add any extra demo materials/links]
+The demo showcases e-മൃഗാലയം’s complete pet social experience: users can create animal profiles with avatars and personalities, log in, upload photo/video posts, like posts, and add comments. It also demonstrates AnimalVlog, which transforms pet videos into narrated Malayalam vlog posts with AI-generated scripts and audio.
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- Devikirishna M K: Worked on the frontend part, handling overall design, animations and frontend backend integration.
+- Jayasankar Menon V: Worked on the animal vlog pipeline , backend api endpoints creation and integration 
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
